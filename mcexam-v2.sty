@@ -1,0 +1,496 @@
+%%
+%% This is file `mcexam-v2.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mcexam-v2.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% 
+%% Copyright (C) 2004 by Steven M. McKay
+%% 
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.2 of this license or (at your option) any later
+%% version.  The latest version of this license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2003/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[2001/06/01]
+\ProvidesPackage{mcexam}[2004/08/01 v1.0 .dtx mcexam file]
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Load Necessary Packages  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{ifthen}% for if then else and whiledo programming structures
+\RequirePackage{calc}% for calculating quantities inside counter commands
+\RequirePackage{refcount}% for setting reference values into counters
+\RequirePackage{tabls}% for setting the vertical spacing in a table.
+\RequirePackage{comment}% for including/excluding solutions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Counter Declarations    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcounter{questcount}
+\newcounter{mccount}
+\newcounter{tmpcount}
+\newcounter{extempcount}
+\newcounter{choicecount}
+\newcounter{colcount}
+\newcounter{numofcols}
+\setcounter{numofcols}{0}
+\newcounter{tablerows}
+\newcounter{tablecols}
+\newcounter{colindex}
+\newcounter{rowindex}
+\newcounter{Qnumber}
+\newcounter{Qmax}
+\newcounter{qnumberm1}
+\newcounter{multiplepoints}
+\newcounter{totalMCcnt}
+\newcounter{MCpointscnt}
+\newcounter{MCstart}
+\newcounter{MCend}
+\newcounter{Qpoints}
+\newcounter{SubTotal}
+\newcounter{Total}
+\newcounter{test}
+\newcounter{start}
+\newcounter{end}
+\newcounter{inMC}
+\setcounter{inMC}{0}
+\newcounter{MCfirst}
+\newcounter{MClast}
+\newcounter{wopt}
+\setcounter{wopt}{0}
+\newcounter{questdepth}
+\setcounter{questdepth}{0}
+\newcounter{correct}
+\setcounter{correct}{0}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Length Declarations     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newlength{\choicelength} % length of a) or b), etc.
+\newlength{\collength} % length of individual column
+\settowidth{\choicelength}{a)}
+\newlength{\olditemsep}
+
+\newlength{\smallspace}
+\setlength{\smallspace}{1in}
+\newlength{\midspace}
+\setlength{\midspace}{2in}
+\newlength{\longspace}
+\setlength{\longspace}{3.5in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Options                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\DeclareOption{draft}
+{
+\setcounter{wopt}{1}
+}
+
+\DeclareOption{solutions}
+{
+\setcounter{wopt}{2}
+}
+\DeclareOption{doc}
+{
+\setcounter{wopt}{3}
+}
+\ProcessOptions
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Documentwide formatting %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifthenelse{\thewopt<3}
+{
+\setlength{\voffset}{-1.in}
+\setlength{\hoffset}{-1.in}
+\setlength{\oddsidemargin}{.5in}
+\setlength{\evensidemargin}{.5in}
+\setlength{\topmargin}{.5in}
+\setlength{\textwidth}{7in}
+\setlength{\headheight}{0.25in}
+\setlength{\headsep}{0.in}
+\setlength{\topskip}{0.in}
+\setlength{\textheight}{10in}
+\setlength{\footskip}{0.5in}
+\pagestyle{empty}
+}{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Spacing Commands        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\shortanswer}{\ifthenelse{\thewopt = 0}{\vspace{\smallspace}}{}}
+\newcommand{\medanswer}{\ifthenelse{\thewopt = 0}{\vspace{\midspace}}{}}
+\newcommand{\longanswer}{\ifthenelse{\thewopt = 0}{\vspace{\longspace}}{}}
+\newcommand{\nextpage}{\ifthenelse{\thewopt = 0}{\ifthenelse{\thequestcount > 0}{\vfill \centerline{TURN PAGE OVER}}{}\newpage}{}}
+\newcommand{\newanswer}[2]{\newcommand{#1}{\ifthenelse{\thewopt = 0}{\vspace{#2}}{}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Front Page Construction %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Course}[2]{\def\@coursenumber{#1}\def\@coursename{#2}}
+\newcommand{\Instructor}[1]{\def\@instructor{#1}}
+\newcommand{\TestName}[1]{\def\@testname{#1}}
+\newcommand{\Date}[1]{\def\@testdate{#1}}
+\newcommand{\Time}[1]{\def\@testtime{#1}}
+\newcommand{\Section}[1]{\def\@section{#1}}
+
+\def\@section{0} % Give section an initialization of 0
+\def\@instructor{noname} %noname indicates the instructor's name has not been initialized
+\def\@testheader{%
+\ifthenelse{\thewopt=0}%name box only in default option
+{
+\hfill \parbox[t]{.5\linewidth}
+{
+\noindent Name:\hrulefill \\[2mm]
+ Student ID:\hrulefill \\[2mm]
+  \ifthenelse{\@section>-1} % if section is less than 0, omit it completely.
+{
+\ifthenelse{\@section< 1} %put a place for the section number if it is not defined
+{
+ Section:\hrulefill \\[2mm]
+}
+{}
+}{}
+ Instructor:\ifthenelse{\equal{\@instructor}{noname}}{\hrulefill}{\ \@instructor}\\[3mm]
+}\\
+}{}
+\ifthenelse{\thewopt=1}%leave off the course and test name in draft mode
+{}
+{
+\noindent\textbf{\LARGE \@coursenumber\ifthenelse{\@section > 0}{-\@section}{}\ (\@coursename)}\\%
+\textbf{\LARGE \@testname \ifthenelse{\thewopt=2}{\ KEY}{}}\\
+\ifthenelse{\thewopt=0}{\textbf{\@testdate}\\}{}%
+}
+\noindent
+}
+\newcommand{\Head}{\thispagestyle{empty}%
+\@testheader}
+\ifthenelse{\thewopt > 0}
+{
+\excludecomment{instructions}
+}
+{
+\newenvironment{instructions}
+{
+\hrule width \linewidth height 2pt\vspace{2pt}
+\hrule width \linewidth height 1pt\vspace{2pt}
+\hrule width \linewidth height 1pt\vspace{2pt}
+\noindent Instructions:
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+}
+{
+\end{itemize}
+\vspace{2mm}
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Question environment    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{questions}
+{
+\begin{enumerate}
+\addtocounter{questdepth}{1}
+\ifthenelse{\thequestdepth=1}{\setcounter{questcount}{0}}{\addtocounter{questcount}{-1}}
+}
+{
+ % write the number of questions to .aux
+\end{enumerate}%
+  \addtocounter{questdepth}{-1}
+   \ifthenelse{\thequestdepth=0}{\vfill \centerline{END OF EXAM}}{}
+}
+\newenvironment{multiplechoice}[2][0] %a sub environment to questions.  The parameter is points per m/c question.
+{
+\setcounter{inMC}{1}% to tell if we are in the multiple choice environment
+   \ifthenelse{\thequestcount=0}{\setcounter{MCfirst}{1}}{\setcounter{MCfirst}{\thequestcount+1}}
+
+\setcounter{mccount}{0} %mult. choice counter
+\@bsphack
+\protected@write\@auxout{}%
+{\string\newlabel{MCpoints}{#2}}%
+\protected@write\@auxout{}%
+{\string\newlabel{MCfirst}{{\theMCfirst}{}}}%
+\@esphack%
+   \ifthenelse{#1=0}{}{
+   \@bsphack
+    \protected@write\@auxout{}%
+{\string\newlabel{MCscore}{{#1}{}}}%
+   \@esphack
+   }
+}
+{ % write the total number of multiple choice questions to .aux
+\setcounter{inMC}{0}% leaving multiple choice
+   \setcounter{MClast}{\thequestcount}
+
+\@bsphack
+\protected@write\@auxout{}%
+{\string\newlabel{totalMC}{{\themccount}{}}}%
+\protected@write\@auxout{}%
+{\string\newlabel{MClast}{{\thequestcount}{}}}%
+\@esphack%
+}
+\newcommand{\question}[1][0]{%
+\addtocounter{questcount}{1}%
+\item \ifthenelse{\theinMC>0}{}%
+{%
+\ifthenelse{#1>0}%
+{%
+(#1 points)%
+\@bsphack%
+\ifthenelse{\@enumdepth=1}%
+{%
+\protected@write\@auxout{}%
+        {\string\newlabel{Qpts\thequestcount}{{#1}{\theenumi}}}%
+}%
+{%
+\ifthenelse{\@enumdepth=2}%
+{%
+\protected@write\@auxout{}%
+        {\string\newlabel{Qpts\thequestcount}{{#1}{\p@enumii\theenumii}}}%
+}%
+{%
+\ifthenelse{\@enumdepth=3}%
+{%
+\protected@write\@auxout{}%
+        {\string\newlabel{Qpts\thequestcount}{{#1}{\p@enumiii\theenumiii}}}%
+}%
+{%
+\protected@write\@auxout{}%
+        {\string\newlabel{Qpts\thequestcount}{{#1}{\p@enumiv\theenumiv}}}%
+}%
+}%
+}%
+\@esphack%
+}{}%
+}%
+\ifthenelse{\theinMC>0}{\addtocounter{mccount}{1}}{}% takes care of multiple choice counter if in that environment
+}%
+\newcommand{\skipquestion}{%
+\addtocounter{questcount}{1}%
+   \addtocounter{enumi}{1}%
+\@bsphack%
+\protected@write\@auxout{}%
+        {\string\newlabel{Skip\thequestcount}{{1}{1}}}%
+\@esphack%
+}%
+\newenvironment{answers}[1] %argument is the number of columns used to display answers
+{
+\setcounter{correct}{0}
+\setcounter{tmpcount}{1}%
+\setcounter{choicecount}{1}%
+\setcounter{colcount}{#1}%
+\setcounter{extempcount}{\value{colcount}}
+\stepcounter{extempcount}
+\setlength{\collength}{\linewidth/(#1)
+-\tabcolsep*2
+-\the\choicelength}%
+\medskip
+\par\begin{tabular*}{\linewidth}{*{#1}{rp{\the\collength}}}%
+}
+{
+\end{tabular*}\par\medskip%
+\ifthenelse{\thewopt=2}{
+\ifthenelse{\value{correct}>0}{
+\begin{solution}%
+\alph{correct})\\%
+\end{solution}%
+}{}%
+}{}%
+
+}
+\newcommand{\ans}[1][0]{
+\ifthenelse{\value{tmpcount} = \value{extempcount}}{ % start an new line
+\\\\% put some spacing in between lines
+\setcounter{tmpcount}{2}
+}
+{
+\ifthenelse{\value{tmpcount} > 1}{ %need an ampersand
+&
+}{}
+\stepcounter{tmpcount}
+}
+\alph{choicecount})&
+
+\ifthenelse{#1>0}{\setcounter{correct}{\value{choicecount}}}{}
+\stepcounter{choicecount}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Solution environment     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifthenelse{\thewopt < 2}
+{
+\excludecomment{solution}% if not solutions option, solution is a comment
+}
+{
+\newenvironment{solution}{\par\noindent {\bf Solution:}\ }{\par}% else solution starts the solution environment
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Points Table Construction%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Tablepart}[2]
+{% can only be called within \PointTable
+\setlength\extrarulesep{7pt}% defines vertical spacing above and below an \hline or \cline in a table
+\setcounter{SubTotal}{0}
+\setcounter{Qnumber}{#1}
+\setcounter{qnumberm1}{\theQnumber - 1}
+\begin{tabular}[t]{|l|r|l|}%
+\hline%
+\# & Possible & Earned\\%
+\hline\hline%
+\whiledo{\value{qnumberm1} < #2}%
+{%
+\ifthenelse{\theQnumber = \theMCstart }%multiple choice entry
+{%
+
+MC & \arabic{multiplepoints} & \\\hline%
+\addtocounter{SubTotal}{\themultiplepoints}%
+\setcounter{Qnumber}{\theMCend}%
+\setcounter{qnumberm1}{\theQnumber - 1}%
+
+}%
+{%
+\ifthenelse{\theQnumber > \theQmax} %run out of questions
+{%
+&&\ifthenelse{\theQnumber = #2}{\\\hline\hline}{\\\hline}%
+}%
+{%
+  \edef\skipname{Skip\theQnumber}%
+  \@ifundefined{r@\skipname}% Question is not skipped: add to table
+  {%
+\edef\questname{Qpts\theQnumber}%
+\setcounterref{Qpoints}{\questname}%
+\pageref{\questname} & \theQpoints & \ifthenelse{\theQnumber = #2}{\\\hline\hline}{\\\hline}%
+\addtocounter{SubTotal}{\theQpoints}%
+   }{}%
+}%
+}%
+\addtocounter{Qnumber}{1}%
+\addtocounter{qnumberm1}{1}%
+}%
+\addtocounter{Total}{\theSubTotal}%
+\ifthenelse{ \thetablecols > 1}%
+{%
+Sub & \theSubTotal & \\\hline%
+\ifthenelse{\thecolindex = \thetest}%last table
+{%
+Total & \theTotal&\\\hline%
+}%
+{%
+& & \\\hline%
+}%
+}%
+{%
+Total & \theTotal & \\\hline%
+}%
+\end{tabular}%
+\setlength\extrarulesep{3pt}% setting the spacing around \hline and \cline back to default
+}%
+\ifthenelse{\thewopt=0}%
+{%
+\newcommand{\PointTable}[1]%
+{%
+\@ifundefined{r@totalQuestions}{}% if aux file doesn't exist yet, do nothing, go to next page
+{%
+\setcounter{Total}{0}%
+\@ifundefined{r@totalMC}%
+{%
+\setcounter{totalMCcnt}{0}%
+\setcounter{MCpointscnt}{1}%
+\setcounter{multiplepoints}{0}%
+}%
+{%
+\setcounterref{totalMCcnt}{totalMC}%
+\setcounterref{MCstart}{MCfirst}%
+\setcounterref{MCend}{MClast}%
+\setcounterref{MCpointscnt}{MCpoints}%
+\@ifundefined{r@MCscore}{%
+\setcounter{multiplepoints}{\value{MCpointscnt}*\value{totalMCcnt}}%
+}%
+{%
+\setcounterref{multiplepoints}{MCscore}%
+}
+}%
+\setcounterref{Qmax}{totalQuestions}%defines the total number of questions.
+\setcounter{tablecols}{#1}%
+\ifthenelse{\thetablecols > 1}%
+{%
+\@ifundefined{r@totalMC}%
+{%
+\setcounter{tablerows}{\theQmax + 1}%
+}%
+{%
+\setcounter{tablerows}{\theQmax-\thetotalMCcnt+2}%
+}%
+}%
+{%
+\@ifundefined{r@totalMC}%
+{%
+\setcounter{tablerows}{\theQmax}%
+}
+{%
+\setcounter{tablerows}{\theQmax-\thetotalMCcnt+1}%
+}%
+}%
+\setcounter{tablerows}{\thetablerows/{#1}}%
+\hrule width \linewidth height 2pt\vspace{2pt}%
+\hrule width \linewidth height 1pt\vspace{2pt}%
+\hrule width \linewidth height 1pt%
+\vspace{4mm}%
+\noindent {\bf For Instructor use only.}\\ \vspace{-.2in}%
+\begin{center}%
+\setcounter{colindex}{0}%
+\setcounter{test}{#1-1}%
+\whiledo{\thecolindex < #1}%
+{%
+\ifthenelse{\thecolindex = 0}%
+{%
+\setcounter{start}{1}%
+\@ifundefined{r@totalMC}%
+{%
+\setcounter{end}{\thetablerows}%
+}%
+{%
+\setcounter{end}{\thestart + \thetotalMCcnt + \thetablerows -2}%
+}%
+}%
+{%
+\setcounter{start}{\theend+1}%
+\setcounter{end}{\thestart + \thetablerows - 1}%
+}%
+\Tablepart{\thestart}{\theend}%
+\ifthenelse{\thecolindex < \thetest}{\hspace{\stretch{0}}}{}%
+\addtocounter{colindex}{1}%
+}%
+\end{center}%
+}%
+\nextpage%
+}%
+}%
+{%
+\newcommand{\PointTable}[1]{}%
+}%
+\AtEndDocument{
+\immediate\write\@mainaux{\string\newlabel{totalQuestions}{{\thequestcount}{ }}}%
+}
+\makeatletter
+\let\rc@refused\refused
+\makeatother
+
+\endinput
+%%
+%% End of file `mcexam-v2.sty'.
