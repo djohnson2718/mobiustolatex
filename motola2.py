@@ -124,7 +124,7 @@ def process_children(tag, output, question_num, is_mc_option):
             if mo_src_file[-4:] == ".gif":
                 src_file = f"../png/{Path(mo_src_file).stem}.png"
             else:
-                src_file = "." + mo_src_file
+                src_file = "../." + mo_src_file
 
             if is_mc_option:
                 output(r"\begin{minipage}[c]{0.25\textwidth}\fbox{\includegraphics[width=4cm]{" + src_file + r"}}\end{minipage}")
