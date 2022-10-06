@@ -1,2 +1,2 @@
-instructors = ["Webster Wong"]
-semester = "Spring 2022"
+instructors = ["T. Dolbin", "K. Oliverson", "R. Paulsen"]
+semester = "Fall 2022"
