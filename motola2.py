@@ -1,6 +1,8 @@
 
 from bs4 import BeautifulSoup, NavigableString
 import re
+
+from numpy import number
 import data
 import sys
 import os
@@ -37,6 +39,8 @@ nonBreakSpace = u'\xa0'
 abc = "Xabcdefghijklm"
 answer_key = dict()
 
+number_chars = "$1234567890,"
+
 def process_children(tag, output, question_num, is_mc_option):
 
     for q_item in tag.children:  
@@ -51,7 +55,14 @@ def process_children(tag, output, question_num, is_mc_option):
                 else:
                     paragraph_text = r"\[" + q_item.string.replace("$",r"\$") + r"\]"
             elif q_item["type"]== "math/tex":
-                paragraph_text = "$" + q_item.string.replace("$",r"\$") + "$"
+                if all((ch in number_chars for ch in q_item.string)):
+                    paragraph_text =  q_item.string.replace(",","{,}")
+                    #print("Number detected!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    #print(q_item.string, "***", paragraph_text)
+                else:
+                    paragraph_text = q_item.string
+                paragraph_text = "$" + paragraph_text.replace("$",r"\$") + "$"
+                
             elif q_item["type"] == "math/mml":
                 #don't really know what this is, but seems ok to ignore it
                 pass
@@ -129,8 +140,12 @@ def process_children(tag, output, question_num, is_mc_option):
             if is_mc_option:
                 output(r"\begin{minipage}[c]{0.25\textwidth}\fbox{\includegraphics[width=4cm]{" + src_file + r"}}\end{minipage}")
             else:
+                if mo_src_file.endswith("Rational-Exam2(1).png"):
+                    width = "18cm"
+                else:
+                    width = "9cm"
                 output("\\begin{center}\n")
-                output("\\includegraphics[width=9cm]{" + src_file +"}\n")
+                output("\\includegraphics[width=" + width + "]{" + src_file +"}\n")
                 output("\\end{center}\n")
 
         elif q_item.name == "em":
