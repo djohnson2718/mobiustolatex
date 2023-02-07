@@ -9,6 +9,7 @@ The requirments to run this script are:
 (1) Python (https://www.python.org/)
 (2) The Beautiful Soup python module (type "pip install bs4" after installing Python)
 (3) ImageMagick (https://imagemagick.org/) 
+(4) Latex (https://miktex.org/)
 
 (When installing, choose the options to add them to your path, so that you can run "python" and "magick" from the command prompt.)
 
